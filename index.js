@@ -1,5 +1,5 @@
 const express = require('express');
-const PORT = 4000;
+
 const server = express();
 const db = require('./models');
 const router = require('./router/router');
@@ -10,7 +10,7 @@ server.use(express.urlencoded({extended : true}));
 
 server.use(router);
 
-server.listen(PORT, ()=>{
+server.listen(process.env.PORT_ENV, ()=>{
   // db.sequelize.sync({ alter: true });
-  console.log(`Server success running on port : ${PORT}`);
+  console.log(`Server success running on port : ${process.env.PORT_ENV} | ${process.env.ORIGINAL_CREATOR}`);
 });
