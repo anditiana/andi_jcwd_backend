@@ -153,13 +153,16 @@ const userController = {
           id : req.user.id
         }
       });
-      console.log(isUserExist.email);
+
+      const template = fs.readFileSync('./template/chUsen.html', 'utf-8');
+      const compileData = await handlebars.compile(template);
+      const tempResult = compileData({username : username, newUsername:newUsername});
 
       const statusMain = await transporter.sendMail({
         from : process.env.MAIL_TRANSPORT,
         to : isUserExist.email,
         subject : 'Change Username',
-        html :`<h1> Success {${isUserExist.email}} </h1>`
+        html : tempResult
       });
 
       const updt = await user.update(
@@ -189,11 +192,15 @@ const userController = {
         {where : {id : req.user.id}}
         );
 
+      const template = fs.readFileSync('./template/chPhone.html', 'utf-8');
+      const compileData = await handlebars.compile(template);
+      const tempResult = compileData({phone : phone, newPhone:newPhone});
+      
       const statusMain = await transporter.sendMail({
         from : process.env.MAIL_TRANSPORT,
         to : isUserExist.email,
-        subject : 'Change Username',
-        html :`<h1> Success ${isUserExist.email} </h1>`
+        subject : 'Change Phone Number',
+        html : tempResult
       });
 
       res.status(200).send({
@@ -207,7 +214,7 @@ const userController = {
   editEmail : async (req, res)=>{
     try {
       const {email, newEmail} = req.body;
-      console.log(req.body, req.user.email);
+      // console.log(req.body, req.user.email);
       if (email!== req.user.email) {
         {throw({message:`Wrong Email`})}
       }
@@ -223,13 +230,21 @@ const userController = {
           {isVerified : false},
           {where : {id : req.user.id}}
           );
-
+        
+        const template = fs.readFileSync('./template/chMail.html', 'utf-8');
+        const compileData = await handlebars.compile(template);
+        const tempResult = compileData({
+          username : username,
+          oldEmail: email,
+          newEmail: newEmail 
+        });
+        
         const token = jwt.sign({username, email, newEmail, phone }, process.env.KEY_TOKEN_CREDENTIAL, {expiresIn :'1h'});
         await transporter.sendMail({
           from : process.env.MAIL_TRANSPORT,
           to : email,
           subject : 'Change Email',
-          html :'<h1> Success </h1>'
+          html : tempResult
         })
 
         res.status(200).send({
